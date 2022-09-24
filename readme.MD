@@ -3,4 +3,4 @@ A simple python script to read the output of the profiler and calculate the time
 
 ## How it works
 
-Test git
+We are now working in the additional features branch
