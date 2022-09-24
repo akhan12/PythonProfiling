@@ -1,5 +1,7 @@
+
 import numpy as np
-from statistics import mean
+import pandas as pd
+import matplotlib.pyplot as plt
 
 #Header Datatype 
 HEADER_dt = np.dtype([
@@ -29,6 +31,8 @@ try:
 except IOError:
     print('Error While Opening file')
 
+
+#Calculation of run times
 diff = []
 for i in range(0,len(data_dump)-1):
     if data_dump[i]['ID_TAG'] == 0x140000:
@@ -39,9 +43,19 @@ for i in range(0,len(data_dump)-1):
     diff.append(end-start)
 
 
-max_ind = diff.index(max(diff))
+#Example barchar
 
-print(data_dump[max_ind])
-print(data_dump[max_ind+1])
-print(max(diff))
-#print(mean(diff))
+runtime_series = pd.Series(diff)
+
+print(runtime_series.describe())
+
+ax = runtime_series.plot.hist(bins=50, range=(runtime_series.min(),500))
+print(ax)
+plt.show()
+
+
+
+
+
+
+
