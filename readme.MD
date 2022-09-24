@@ -3,4 +3,9 @@ A simple python script to read the output of the profiler and calculate the time
 
 ## How it works
 
-We are now working in the additional features branch
+Issues to check for:
+* Missing Header
+* Ensure that start/stop ID of corresponding rows are for that run
+
+##Schema
+Populate with Schema info and data types

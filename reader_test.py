@@ -13,32 +13,35 @@ TIMESTAMP_dt = np.dtype([
     ("ID_TAG","<u4")
 ])
 
-dtype = np.dtype('B')
+
+#To view data as hex
 np.set_printoptions(formatter={ 'int': hex})
 
-#Read bin file according to the scheme
+#Read bin file according to the schema
+#Dump entire file into RAM 
 try:
     with open('ecu_trace.bin', 'rb') as f:
-        numpy_data = np.fromfile(f, dtype=HEADER_dt, count=1, sep="", offset=0)
-        numpy_data2 = np.fromfile(f, dtype=TIMESTAMP_dt, count=-1, sep="", offset=0)
-    print(numpy_data[0:8])
-    print(numpy_data[8:16])
-    print(numpy_data2[0:5])
+        hdr_info = np.fromfile(f, dtype=HEADER_dt, count=1, sep="", offset=0)
+        data_dump = np.fromfile(f, dtype=TIMESTAMP_dt, count=-1, sep="", offset=0)
+        print(hdr_info[0:8])
+        print(hdr_info[8:16])
+        print(data_dump[0:5])
 except IOError:
     print('Error While Opening file')
 
 diff = []
-for i in range(0,len(numpy_data2)-1):
-    if numpy_data2[i]['ID_TAG'] == 0x140000:
-        start = numpy_data2[i]['CLOCKS_SINCE_START']
-    if numpy_data2[i+1]['ID_TAG'] == 0x1e0000:
-        end = numpy_data2[i+1]['CLOCKS_SINCE_START']
+for i in range(0,len(data_dump)-1):
+    if data_dump[i]['ID_TAG'] == 0x140000:
+        start = data_dump[i]['CLOCKS_SINCE_START']
+    if data_dump[i+1]['ID_TAG'] == 0x1e0000:
+        end = data_dump[i+1]['CLOCKS_SINCE_START']
     
     diff.append(end-start)
 
 
-print(diff)
+max_ind = diff.index(max(diff))
 
+print(data_dump[max_ind])
+print(data_dump[max_ind+1])
 print(max(diff))
-
-print(mean(diff))
+#print(mean(diff))
