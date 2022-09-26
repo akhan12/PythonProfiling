@@ -49,7 +49,7 @@ runtime_series = pd.Series(diff)
 
 print(runtime_series.describe())
 
-ax = runtime_series.plot.hist(bins=50, range=(runtime_series.min(),500))
+ax = runtime_series.plot.hist(bins=50)
 print(ax)
 plt.show()
 
