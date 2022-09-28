@@ -10,6 +10,8 @@ HEADER_dt = np.dtype([
 ])
 
 #Timestamp Datatype
+#Note how it is flipped compared to the C code/Schema when 
+#taking 64 bits
 TIMESTAMP_dt = np.dtype([
     ("CLOCKS_SINCE_START", "<u4"),
     ("ID_TAG","<u4")

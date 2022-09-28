@@ -5,14 +5,20 @@ import matplotlib.pyplot as plt
 
 #Header Datatype 
 HEADER_dt = np.dtype([
-    ("CLOCKS_PER_SECOND", "<u8"),
-    ("TIMESTAMP_AMOUNT_STEP", "<u8"),
+    ("Start_ID", "<u8"),
+    ("Block_Amt_Set", "<u8"),
+    ("Block_Size", "<u8"),
+    ("Capture_Type", "<u8"),
+    ("USTACK0_Base_Addr", "<u8"),
+    ("ISTACK0_Base_Addr", "<u8")
 ])
 
 #Timestamp Datatype
-TIMESTAMP_dt = np.dtype([
-    ("CLOCKS_SINCE_START", "<u4"),
-    ("ID_TAG","<u4")
+#Note how it is flipped in this compared to the C code
+STACK_dt = np.dtype([
+    ("STACK_POINTER", "<u4"),
+    ("PSW IS","<u2"),
+    ("ID_TAG", "<u2")
 ])
 
 
@@ -22,36 +28,18 @@ np.set_printoptions(formatter={ 'int': hex})
 #Read bin file according to the schema
 #Dump entire file into RAM 
 try:
-    with open('ecu_trace.bin', 'rb') as f:
+    with open('ecu_trace_stack.bin', 'rb') as f:
         hdr_info = np.fromfile(f, dtype=HEADER_dt, count=1, sep="", offset=0)
-        data_dump = np.fromfile(f, dtype=TIMESTAMP_dt, count=-1, sep="", offset=0)
-        print(hdr_info[0:8])
-        print(hdr_info[8:16])
+        data_dump = np.fromfile(f, dtype=STACK_dt, count=-1, sep="", offset=0)
+        print(hdr_info)
+     
         print(data_dump[0:5])
 except IOError:
     print('Error While Opening file')
 
 
 #Calculation of run times
-diff = []
-for i in range(0,len(data_dump)-1):
-    if data_dump[i]['ID_TAG'] == 0x140000:
-        start = data_dump[i]['CLOCKS_SINCE_START']
-    if data_dump[i+1]['ID_TAG'] == 0x1e0000:
-        end = data_dump[i+1]['CLOCKS_SINCE_START']
-    
-    diff.append(end-start)
 
-
-#Example barchar
-
-runtime_series = pd.Series(diff)
-
-print(runtime_series.describe())
-
-ax = runtime_series.plot.hist(bins=50)
-print(ax)
-plt.show()
 
 
 

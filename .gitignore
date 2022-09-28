@@ -14188,3 +14188,7 @@ env/share/jupyter/kernels/python3/logo-64x64.png
 env/share/jupyter/kernels/python3/logo-svg.svg
 env/share/man/man1/ipython.1
 env/share/man/man1/ttx.1
+ecu_trace_ostasks_timestamp.7z
+ecu_trace_final.bin
+.gitignore
+ecu_trace_stack.bin
