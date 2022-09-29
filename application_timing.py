@@ -3,19 +3,52 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
+#https://www.geeksforgeeks.org/python-slicing-extract-k-bits-given-position/
+def extractKBits(num,k,p):
+ 
+     # convert number into binary first
+     binary = bin(num)
+ 
+     # remove first two characters
+    
+     binary = binary[2:]
+ 
+     end = len(binary) - p
+     start = end - k + 1
+ 
+     # extract k  bit sub-string
+     kBitSubStr = binary[start : end+1]
+  
+     print(int(kBitSubStr,2))
+     return int(kBitSubStr,2)
+ 
+
+#Application Dictionary
+app_dict = {
+    "OsTask_ASW_Period" : [10, 11],
+    "OsTask_ASW" : [30, 31],
+    "OsTask_BSW" : [50, 51],
+    "OsTask_CDD_Period": [120, 121],
+    "OsTask_EthTSyn" : [130, 131],
+    "OsTask_MS" : [140, 141],
+    "OsTask_SUM_DataRecv" : [160, 161],
+    "OsTask_SUM_Period" : [200, 201], 
+    "OsTask_SUM" : [280, 281]
+}
 #Header Datatype 
 HEADER_dt = np.dtype([
-    ("CLOCKS_PER_SECOND", "<u8"),
-    ("TIMESTAMP_AMOUNT_STEP", "<u8"),
+    ("Start_ID", "<u8"),
+    ("Block_Amt_Set", "<u8"),
+    ("Block_Size", "<u8"),
+    ("Capture_Type", "<u8"),
+    ("Clocks_Per_Sec", "<u8")
 ])
 
 #Timestamp Datatype
 #Note how it is flipped compared to the C code/Schema when 
 #taking 64 bits
-TIMESTAMP_dt = np.dtype([
-    ("CLOCKS_SINCE_START", "<u4"),
-    ("ID_TAG","<u4")
-])
+TIMESTAMP_dt = np.dtype('<u8')
 
 
 #To view data as hex
@@ -24,7 +57,7 @@ np.set_printoptions(formatter={ 'int': hex})
 #Read bin file according to the schema
 #Dump entire file into RAM 
 try:
-    with open('ecu_trace.bin', 'rb') as f:
+    with open('ecu_trace_final.bin', 'rb') as f:
         hdr_info = np.fromfile(f, dtype=HEADER_dt, count=1, sep="", offset=0)
         data_dump = np.fromfile(f, dtype=TIMESTAMP_dt, count=-1, sep="", offset=0)
         print(hdr_info[0:8])
@@ -33,6 +66,8 @@ try:
 except IOError:
     print('Error While Opening file')
 
+#if x!=0 used to remove anaomlies (found an all zeroes entry in bin file)
+data_split = [[extractKBits(x,48,1),extractKBits(x,64,49)] for x in data_dump if x!=0]
 
 #Calculation of run times
 diff = []
