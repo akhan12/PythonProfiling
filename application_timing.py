@@ -1,179 +1,30 @@
-
-from email.mime import base
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import sys
 
-#this version uses the index matrix sorted_data
-def taskRT_extraction2(key,app_dict,sorted_data,data_time):
-    diff = []
-    start_id = app_dict[key][0]
-    stop_id = app_dict[key][1]
-    other_start_stop = []
-    #find other start_stop values
-    for other_key in app_dict:
-        if other_key!=key:
-            other_start_stop.append(app_dict[other_key])
-    
-    for idx in range(len(sorted_data)-1):
-        if sorted_data[idx][1] != start_id:
-            continue
-        #if next value is the stop/end value
-        if sorted_data[idx][1] == start_id and sorted_data[idx+1][1]== stop_id:
-            next_data = data_time[sorted_data[idx+1][0]]
-            current_data = data_time[sorted_data[idx][0]]
-            diff.append(next_data-current_data)
-        
-        else: 
-            for idy in range(idx+1,len(sorted_data)-1):
-                if sorted_data[idx][1] == start_id and sorted_data[idy][1]== stop_id:
-                    next_data = data_time[sorted_data[idy][0]]
-                    current_data = data_time[sorted_data[idx][0]]
-                    temp_diff = next_data - current_data
-                    #end checker for other task
-                    other_start_id = sorted_data[idx+1][1]
-                    other_end_id = other_start_id + 1
-                    for oidx in range(idx+2,idy):
-                        if sorted_data[oidx][1] == other_end_id:
-                            other_current = data_time[sorted_data[idx+1][0]]
-                            other_next = data_time[sorted_data[oidx][0]]
-                            other_diff = other_next - other_current
-                            diff.append(temp_diff - other_diff)
-                            break
-                    break
-                        
-    return diff   
+from task_mod import extractKBits, task_separator, sortFunc, taskRT_extraction
 
-def all_list_indices(data_list, value):
-     
-     indices = []
-     for i in range(len(data_list)):
-         if data_list[i] == value:
-             indices.append(i)
-     return indices        
+n = len(sys.argv)
 
-def sortFunc(e):
-    return e[0]
-     
-def task_separator(key,app_dict,data_id,data_time):
-    start_id = app_dict[key][0]
-    end_id = app_dict[key][1]
-    
-    start_indices = all_list_indices(data_id,start_id)
-    end_indices = all_list_indices(data_id,end_id)
-    #length of both combined
-    start_stop_comb = []
-    max_ind = max(len(start_indices),len(end_indices))
-    len_start = len(start_indices)
-    len_end = len(end_indices)
-    
-    #keep track of where in the sort each array is
-    start_ind = 0
-    end_ind = 0
-    #testing of refecatoring of below code
-    start_stop_comb_refactor = []
-    for i in start_indices:
-        start_stop_comb_refactor.append([i,start_id])
-    
-    for i in end_indices:
-        start_stop_comb_refactor.append([i,end_id])
-    
-    start_stop_comb_refactor.sort(key=sortFunc)
-        
-    
-    
-    
-    #loop to combine
-    # for i in range(len_start+len_end):
-    #     if start_ind >= len_start and end_ind<len_end:
-    #         start_stop_comb.append([end_indices[end_ind],end_id])
-    #         end_ind = end_ind + 1
-    #     elif end_ind >= len_end and start_ind<len_start:
-    #         start_stop_comb.append([start_indices[start_ind],start_id])
-    #         start_ind = start_ind + 1
-    #     else:
-    #         if start_indices[start_ind] < end_indices[end_ind]:
-    #             start_stop_comb.append([start_indices[start_ind],start_id])
-    #             start_ind = start_ind + 1
-    #         else:
-    #             start_stop_comb.append([end_indices[end_ind],end_id])
-    #             end_ind = end_ind + 1
-                
-    comb_nodup = duplicate_finder(start_stop_comb_refactor,start_id, end_id)
-    
-  
-    
-    return comb_nodup
-            
+units ={
+    "ms": 1000,
+    "uS": 1e6
+}
 
-#find duplicates in tasks separated out in the task separate function
-def duplicate_finder(comb,start_id, stop_id):
-    
-    comb_len = len(comb)
-    comb_nodup = []
-    dup_flag = 0
-    for i in range(comb_len-1):
-        if dup_flag == 1:
-            dup_flag = 0
-        #edge case (end)
-        elif dup_flag ==1 and i==(comb_len-2):
-            comb_nodup.append(comb[i+1])
-        elif comb[i][1]==comb[i+1][1]:
-            dup_flag = 1
-            # print("duplicate_detected")
-            # print(comb[i])
-            # print(comb[i+1])
-            #if a start then take the second if end take the first
-            #assume first start does not have a matching end and 
-            #second end does not have a matching start 
-            if comb[i][1] == start_id:
-                comb_nodup.append(comb[i+1])
-            else: comb_nodup.append(comb[i])
-        elif i==(comb_len-2) and comb[i][1]!=comb[i+1][1]:
-                comb_nodup.append(comb[i])
-                comb_nodup.append(comb[i+1])
-        else: comb_nodup.append(comb[i])
-   
-    return comb_nodup
-    
-        
-    
-    
-        
-    
-    
-    
-    
-           
+try:
+    file_name = sys.argv[1]
+except:
+    print("No filename passed, code will fail")
 
-                    
-    
-    
+try:
+    unit = units[sys.argv[2]]
+except:
+    print("Wrong or no units specified, default milliseconds")
+    unit = units["ms"]
 
-#https://www.geeksforgeeks.org/python-slicing-extract-k-bits-given-position/
-def extractKBits(num,k,p):
- 
-     # convert number into binary first
-     binary = bin(num)
- 
-     # remove first two characters
-    
-     binary = binary[2:]
- 
-     end = len(binary) - p
-     #modfied to specify up to the MSb
-     if k == 0:
-         start = 0
-     else: 
-        start = end - k + 1
- 
-     # extract k  bit sub-string
-     kBitSubStr = binary[start : end+1]
-  
-   
-     return int(kBitSubStr,2)
- 
+#Application list for naming
 app_list = ['OsTask_ASW_Period',
             'OsTask_ASW',
             'OsTask_BSW',
@@ -183,6 +34,7 @@ app_list = ['OsTask_ASW_Period',
             'OsTask_SUM_DataRecv',
             'OsTask_SUM_Period',
             'OsTask_SUM']
+
 #Application Dictionary
 app_dict = {
     "OsTask_ASW_Period" : [10, 11],
@@ -216,7 +68,7 @@ np.set_printoptions(formatter={ 'int': hex})
 #Read bin file according to the schema
 #Dump entire file into RAM 
 try:
-    with open('ecu_trace_final.bin', 'rb') as f:
+    with open(file_name, 'rb') as f:
         hdr_info = np.fromfile(f, dtype=HEADER_dt, count=1, sep="", offset=0)
         data_dump = np.fromfile(f, dtype=TIMESTAMP_dt, count=-1, sep="", offset=0)
         print(hdr_info[0:8])
@@ -225,13 +77,8 @@ try:
 except IOError:
     print('Error While Opening file')
 
-#if x!=0 used to remove anaomlies (found an all zeroes entry in bin file)
-#issues to add to readme
-#1. anomaly values of all zeroes (currently does this but if the entire 8 bytes are zero)
-#if they are not as in the footer then extractbits throws an error
-#2. footer extraction (avoids zero detection ) is the solution
+clocks_per_sec = extractKBits(hdr_info['Clocks_Per_Sec'][0],48,1)
 
-#footer extraction (assumption that the footer is present)
 
 footer = data_dump[-4:]
 if extractKBits(footer[0],16,49)==0xFFFC:
@@ -247,21 +94,19 @@ data_id = [extractKBits(x,0,49) for x in data_dump if x!=0]
 data_time = [extractKBits(x,48,1) for x in data_dump if x!=0]
 
 
-
-test = all_list_indices(data_id, 50)
-test2 = all_list_indices(data_id, 51)
-
 sorted_indices = []
 for i in app_dict:
     print(i)
     comb_nodup = task_separator(i,app_dict,data_id,data_time)
     sorted_indices.extend(comb_nodup)
-#comb_nodup = duplicate_finder(comb,10,11)
+
 
 sorted_indices.sort(key=sortFunc)
+
 diff = []
 for i in app_dict:
-    indv_diff = taskRT_extraction2(i,app_dict,sorted_indices,data_time)
+    indv_diff = taskRT_extraction(i,app_dict,sorted_indices,data_time)
+    indv_diff = [unit*x/clocks_per_sec for x in indv_diff]
     diff.append(indv_diff)
 
 #Calculation of run times
