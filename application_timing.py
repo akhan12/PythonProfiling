@@ -1,7 +1,9 @@
 
+from email.mime import base
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 #this version uses the index matrix sorted_data
 def taskRT_extraction2(key,app_dict,sorted_data,data_time):
@@ -42,30 +44,6 @@ def taskRT_extraction2(key,app_dict,sorted_data,data_time):
                     break
                         
     return diff   
-
-def taskRT_extraction(key,app_dict,data_split):
-    diff = []
-    start_id = app_dict[key][0]
-    stop_id = app_dict[key][1]
-    other_start_stop  = []
-    
-    #find other start_stop values
-    for other_key in app_dict:
-        if other_key!=key:
-            other_start_stop.append(app_dict[other_key])
-    
-    for idx in range((len(data_split))-1):
-        #no preemption
-        if data_split[idx][1] == start_id and data_split[idx+1][1] == stop_id:
-            diff.append(data_split[idx+1][0]-data_split[idx][0])
-        #check preemption
-        elif data_split[idx][1] == start_id:
-            start = data_split[idx][0]
-            for idy in range(idx+2,(data_split.size)-1):
-                if data_split[idy][1] == stop_id:
-                    end = data_split[idy][0]
-        #check run time for higher priority task runtimes
-
 
 def all_list_indices(data_list, value):
      
@@ -294,26 +272,31 @@ for i in range(len(diff)):
 for i in range(len(diff)):
     print(diff_series[i].describe())
     
-# runtime_series = pd.Series(diff)
-# print(runtime_series.describe())
+#Paths
+basepath = './timing_csv'
+os.makedirs(basepath, exist_ok=True)
 
-# ax = runtime_series.plot.hist(bins=50)
-# print(ax)
-# plt.show()
+timing_path = os.path.join(basepath,'timing')
+os.makedirs(timing_path, exist_ok=True)
+
+stat_path = os.path.join(basepath,'stat')
+os.makedirs(stat_path, exist_ok=True)
+
+imgs_path = "./images"
+os.makedirs(imgs_path, exist_ok=True)
+
 for i in range(len(diff)):
-    (diff_series[i]).to_csv(f'timing_{app_list[i]}.csv')
+    data_path = os.path.join(timing_path,f'timing_{app_list[i]}.csv')
+    st_path = os.path.join(stat_path,f'stats_{app_list[i]}.csv')
+    (diff_series[i]).to_csv(data_path)
     stats_ser = diff_series[i].describe()
-    stats_ser.to_csv(f'stats_{app_list[i]}.csv')
-
-fig, axes = plt.subplots(nrows=2, ncols=2)
-
-diff_series[0].plot.hist(bins=50,ax=axes[0,0])
-diff_series[1].plot.hist(bins=50,ax=axes[0,1])
-diff_series[2].plot.hist(bins=50,ax=axes[1,0])
-diff_series[3].plot.hist(bins=50,ax=axes[1,1])
-
-plt.show()
-
+    stats_ser.to_csv(st_path)
+    fig1 = plt.figure(i)
+    diff_series[i].plot.hist(bins=50)
+    img_path = os.path.join(imgs_path, f'hist_{app_list[i]}.png')
+    plt.savefig(img_path)
+    
+    
 
 
 
