@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import sys
+from math import floor
 
 from task_mod import extractKBits, task_separator, sortFunc, taskRT_extraction
 
@@ -71,13 +72,16 @@ if extractKBits(footer[0],16,49)==0xFFFF:
 data_id = [extractKBits(x,0,49) for x in data_dump if x!=0]
 data_time = [extractKBits(x,48,1) for x in data_dump if x!=0]
 
-
+#first separate each task using task_separate which also calls 
+#the duplicate finder function and then creates a list without duplicates
+#for all start/stop ids
 sorted_indices = []
 for i in app_dict:
     comb_nodup = task_separator(i,app_dict,data_id,data_time)
     sorted_indices.extend(comb_nodup)
 
-
+#Values added sequentially 
+#so a sort function to sort by idx is added
 sorted_indices.sort(key=sortFunc)
 
 diff = []
@@ -136,6 +140,16 @@ for i in diff:
 
 print(f'CPU Utilization: {(sum_rt/total_rt)*100:.2f} %')
 
+#divide into 50ms windows
+total_rt_div = floor(total_rt/50)
+end_time = total_rt_div *50
+
+util_div = []
+for i in range(0,end_time,50):
+    util_div.append(i)
+    
+print('done')
+    
 
 
 

@@ -46,7 +46,7 @@ def taskRT_extraction(key,app_dict,sorted_data,data_time):
                         
     return diff 
 
-
+#finds the indices of a particular start/stop value
 def all_list_indices(data_list, value):
      
      indices = []
@@ -55,8 +55,10 @@ def all_list_indices(data_list, value):
              indices.append(i)
      return indices        
 
+#sort based on ID e[0]: idx e[1] start/stop value
 def sortFunc(e):
     return e[0]
+ 
      
 def task_separator(key,app_dict,data_id,data_time):
     start_id = app_dict[key][0]
@@ -74,6 +76,7 @@ def task_separator(key,app_dict,data_id,data_time):
     start_ind = 0
     end_ind = 0
     #testing of refecatoring of below code
+    #Creating a list recombining the start/stop values and sorting 
     start_stop_comb_refactor = []
     for i in start_indices:
         start_stop_comb_refactor.append([i,start_id])
