@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["ecu_trace_time_final.bin"]
+            "args": ["ecu_trace_time_final.bin","100"]
         }
     ]
 }

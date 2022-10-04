@@ -24,6 +24,12 @@ except:
 
 unit = units["ms"]
 
+try:
+    sample_period = int(sys.argv[2])
+except:
+    print("No sample period specified, default 50ms")
+    sample_period = 50
+    
 
 #Header Datatype 
 HEADER_dt = np.dtype([
@@ -85,11 +91,29 @@ for i in app_dict:
 sorted_indices.sort(key=sortFunc)
 
 diff = []
+#added in start_times to taskRT_extraction
+start_times = []
+#for zero time reference utilization
+initial_flag = 0
+
 #Units in ms
 for i in app_dict:
-    indv_diff = taskRT_extraction(i,app_dict,sorted_indices,data_time)
+    [indv_diff, indv_start] = taskRT_extraction(i,app_dict,sorted_indices,data_time)
     indv_diff = [unit*x/clocks_per_sec for x in indv_diff]
+    indv_start = [unit*x/clocks_per_sec for x in indv_start]
     diff.append(indv_diff)
+    start_times.append(indv_start)
+    if len(indv_start)!=0:
+        temp = min(indv_start)
+    if initial_flag == 0:
+        zero_ref = temp
+        initial_flag = 1
+    elif temp<zero_ref:
+        zero_ref = temp
+    
+    
+start_times_zero_ref = [[y-zero_ref for y in x] for x in start_times]
+
 
 #Calculation of run times
 diff_series = []
@@ -141,13 +165,41 @@ for i in diff:
 print(f'CPU Utilization: {(sum_rt/total_rt)*100:.2f} %')
 
 #divide into 50ms windows
-total_rt_div = floor(total_rt/50)
-end_time = total_rt_div *50
+total_rt_div = floor(total_rt/sample_period)
+end_time = total_rt_div *sample_period
 
 util_div = []
-for i in range(0,end_time,50):
+for i in range(0,end_time,sample_period):
     util_div.append(i)
-    
+
+util = [] 
+temp_stime = start_times_zero_ref 
+temp_diff = diff
+#no duplicate searches, moving window
+idy_init = [0 for x in range(0,len(temp_stime))]
+for i in range(0,len(util_div)):
+    shift_series = [[y-util_div[i] for y in x] for x in temp_stime]
+    run_time = 0
+    for idx in range(len(shift_series)):
+        for idy in range(len(shift_series[idx])):
+            idy_last = idy_init[idx]
+            if shift_series[idx][idy]>=0 and shift_series[idx][idy]<=sample_period:
+                run_time = run_time + temp_diff[idx][idy]
+            elif shift_series[idx][idy]>sample_period:
+                break
+
+    #100/50ms for percent
+    util.append(100*run_time/sample_period)
+
+plt.plot(util)
+plt.ylim(0,100)
+util_ds = pd.Series(util)
+utilization_path = os.path.join(basepath,'utilization')
+os.makedirs(utilization_path, exist_ok=True)
+util_stat = util_ds.describe()
+print(util_stat)
+util_stat.to_csv(os.path.join(utilization_path,'util_stat.csv'))
+plt.savefig(os.path.join(utilization_path,'util.png'))
 print('done')
     
 

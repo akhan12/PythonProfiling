@@ -14332,3 +14332,5 @@ ecu_trace_stack
 ecu_trace_time.bin
 c2999_raw.7z
 __pycache__/constants.cpython-310.pyc
+timing_csv/utilization/util_stat.csv
+timing_csv/utilization/util.png

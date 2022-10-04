@@ -9,6 +9,8 @@
 #this version uses the index matrix sorted_data
 def taskRT_extraction(key,app_dict,sorted_data,data_time):
     diff = []
+    #start times for cooresponding differences
+    start_times = []
     start_id = app_dict[key][0]
     stop_id = app_dict[key][1]
     other_start_stop = []
@@ -25,6 +27,7 @@ def taskRT_extraction(key,app_dict,sorted_data,data_time):
             next_data = data_time[sorted_data[idx+1][0]]
             current_data = data_time[sorted_data[idx][0]]
             diff.append(next_data-current_data)
+            start_times.append(current_data)
         
         else: 
             for idy in range(idx+1,len(sorted_data)-1):
@@ -41,10 +44,11 @@ def taskRT_extraction(key,app_dict,sorted_data,data_time):
                             other_next = data_time[sorted_data[oidx][0]]
                             other_diff = other_next - other_current
                             diff.append(temp_diff - other_diff)
+                            start_times.append(current_data)
                             break
                     break
                         
-    return diff 
+    return diff, start_times
 
 #finds the indices of a particular start/stop value
 def all_list_indices(data_list, value):
