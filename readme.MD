@@ -5,7 +5,7 @@ Python scripts to parse the output of the profiler and calculate the run time of
 
 * Run 'pip install -r requirements.txt' to install the required modules
 * To use for CPU utilization/timing run the python script, application_timing.py 'file-name' 'sampling-time'\
-Where file name is the name of the binary file and sampling time is sampling time for CPU utilization in ms (if unspecified, default value of 50ms is used)
+Where file name is the name of the binary file (place in a folder called bin in root directory) and sampling time is sampling time for CPU utilization in ms (if unspecified, default value of 50ms is used)
 * To use for Stack Usage, run the python script stack_memory_usage.py 'file-name' \
 file-name: binary file of stack usage
 
