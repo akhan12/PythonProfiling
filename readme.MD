@@ -8,6 +8,11 @@ Python scripts to parse the output of the profiler and calculate the run time of
 Where file name is the name of the binary file (place in a folder called bin in root directory) and sampling time is sampling time for CPU utilization in ms (if unspecified, default value of 50ms is used)
 * To use for Stack Usage, run the python script stack_memory_usage.py 'file-name' \
 file-name: binary file of stack usage
+* Folders are created in root directory:
+timing_csv-> stat: contains csv files with timing statistics
+          -> timing: contains csv files with raw timing data
+          -> utilization: contains a csv file with utilization statistics and graph
+images: contains image of histograms of application run times
 
 ### Schema for Application Timing
 Header:
